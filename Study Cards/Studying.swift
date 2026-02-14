@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum StudyMode: String, Codable, CaseIterable, Equatable {
+enum StudyMode: String, Codable, CaseIterable, Hashable {
     case termFirst
     case definitionFirst
 }
@@ -74,7 +74,7 @@ struct Studying: View {
                 .controlSize(.large)
                 .padding(.horizontal)
 
-                // Progress
+                
                 if !isEmpty {
                     Text("Card \(index + 1) of \(cards.count)")
                         .font(.footnote)
@@ -87,7 +87,7 @@ struct Studying: View {
         .navigationTitle(mode == .termFirst ? "Study: Term First" : "Study: Definition First")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            // Start each session with the chosen side up
+            
             print("Studying appeared with mode ", mode)
             showingFront = true
         }

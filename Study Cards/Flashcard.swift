@@ -8,18 +8,17 @@
 import SwiftUI
 
 struct Flashcard: View {
-    @State private var collection: CardCollection
+    @Binding var collection: CardCollection
     @State private var term: String = ""
     @State private var definition: String = ""
     @FocusState private var focusedField: Field?
+    @State private var studyCollection: CardCollection? = nil
 
     enum Field {
         case term, definition
     }
 
-    init(collection: CardCollection) {
-        _collection = State(initialValue: collection)
-    }
+    var startStudying: (CardCollection, StudyMode) -> Void
 
     var body: some View {
         List {
@@ -42,54 +41,32 @@ struct Flashcard: View {
             }
 
             if !collection.cards.isEmpty {
-                VStack {
-                    Text("Study By").font(.title)
-                    HStack {
-                        Spacer()
-                        NavigationLink {
-                            Studying(cards: collection.cards, mode: .termFirst)
+                    Section("Study By") {
+                        Button {
+                            startStudying(collection, .termFirst)
                         } label: {
                             Label("Term", systemImage: "book.closed.fill")
-                                .frame(maxWidth: .infinity)
-                                .padding(10)
                         }
 
-                        Spacer()
-
-                        NavigationLink {
-                            Studying(cards: collection.cards, mode: .definitionFirst)
+                        Button {
+                            startStudying(collection, .definitionFirst)
                         } label: {
                             Label("Description", systemImage: "text.pad.header")
-                                .frame(maxWidth: .infinity)
-                                .padding(10)
                         }
-                        
-                        Spacer()
                     }
-                    .labelStyle(.titleAndIcon)
-                    .controlSize(.large)
-                }
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
 
-                Section("Cards") {
-                    ForEach(collection.cards) { card in
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(card.term).font(.headline)
-                            Text(card.definition).foregroundStyle(.secondary)
+                    Section("Cards") {
+                        ForEach(collection.cards) { card in
+                            VStack(alignment: .leading) {
+                                Text(card.term).font(.headline)
+                                Text(card.definition).foregroundStyle(.secondary)
+                            }
                         }
-                        .padding(.vertical, 4)
+                        .onDelete(perform: deleteCards)
                     }
-                    .onDelete(perform: deleteCards)
                 }
             }
-        }
-        .navigationTitle(collection.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            reloadFromDisk()
-        }
+            .navigationTitle(collection.name)
     }
 
     private func addCard() {
@@ -114,18 +91,8 @@ struct Flashcard: View {
             print("Save failed:", error)
         }
     }
-
-    private func reloadFromDisk() {
-        do {
-            collection = try Persistence.loadCollection(id: collection.id)
-        } catch {
-            print("Load failed:", error)
-        }
-    }
 }
 
 #Preview {
-    NavigationStack {
-        Flashcard(collection: CardCollection(name: "World History"))
-    }
+    ContentView()
 }
