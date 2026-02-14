@@ -22,18 +22,15 @@ struct Flashcard: View {
     }
 
     var body: some View {
-        
         List {
             Section("Add New Card") {
                 TextField("Term", text: $term)
                     .focused($focusedField, equals: .term)
                     .textInputAutocapitalization(.words)
-                    .disableAutocorrection(true)
 
                 TextField("Definition", text: $definition, axis: .vertical)
                     .focused($focusedField, equals: .definition)
                     .textInputAutocapitalization(.sentences)
-                    .disableAutocorrection(false)
 
                 Button {
                     addCard()
@@ -43,35 +40,39 @@ struct Flashcard: View {
                 .disabled(term.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                           definition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-            
+
             if !collection.cards.isEmpty {
-                
                 VStack {
                     HStack {
                         Spacer()
-                        Button {
-                            print("Studying by term!")
+                        NavigationLink {
+                            Studying(cards: collection.cards, mode: .termFirst)
                         } label: {
                             Label("Term", systemImage: "book.closed.fill")
+                                .frame(maxWidth: .infinity)
                         }
-                        
+
                         Spacer()
-                        
-                        Button {
-                            print("Studying by description!")
+
+                        NavigationLink {
+                            Studying(cards: collection.cards, mode: .definitionFirst)
                         } label: {
                             Label("Description", systemImage: "text.pad.header")
+                                .frame(maxWidth: .infinity)
                         }
                         Spacer()
-                    }.labelStyle(.titleAndIcon).buttonStyle(.bordered).controlSize(.large)
-                }.listRowInsets(EdgeInsets()).listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                    }
+                    .labelStyle(.titleAndIcon)
+                    .controlSize(.large)
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+
                 Section("Cards") {
                     ForEach(collection.cards) { card in
                         VStack(alignment: .leading, spacing: 6) {
-                            
                             Text(card.term).font(.headline)
-                            
                             Text(card.definition).foregroundStyle(.secondary)
                         }
                         .padding(.vertical, 4)
