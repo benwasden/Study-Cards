@@ -43,6 +43,7 @@ struct Flashcard: View {
 
             if !collection.cards.isEmpty {
                 VStack {
+                    Text("Study By").font(.title)
                     HStack {
                         Spacer()
                         NavigationLink {
@@ -50,6 +51,7 @@ struct Flashcard: View {
                         } label: {
                             Label("Term", systemImage: "book.closed.fill")
                                 .frame(maxWidth: .infinity)
+                                .padding(10)
                         }
 
                         Spacer()
@@ -59,7 +61,9 @@ struct Flashcard: View {
                         } label: {
                             Label("Description", systemImage: "text.pad.header")
                                 .frame(maxWidth: .infinity)
+                                .padding(10)
                         }
+                        
                         Spacer()
                     }
                     .labelStyle(.titleAndIcon)
