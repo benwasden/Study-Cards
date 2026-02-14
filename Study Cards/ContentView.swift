@@ -1,3 +1,10 @@
+//
+//  ContentView.swift
+//  Study Cards
+//
+//  Created by Benjamin Wasden on 2/1/26.
+//
+
 import SwiftUI
 
 struct ContentView: View {
@@ -5,13 +12,14 @@ struct ContentView: View {
     @State private var showCreateNewCollection = false
     @State private var newCollectionName: String = ""
     @FocusState private var isNameFieldFocused: Bool
-    @State private var studyCollection: CardCollection? = nil
-    @State private var studyMode: StudyMode? = nil
-    
+
+    // The main home view of the app
     var body: some View {
+        // Navigation
         NavigationStack {
             List {
                 
+                // Create a new card collection
                 Section {
                     Button {
                         newCollectionName = ""
@@ -20,34 +28,30 @@ struct ContentView: View {
                         Label("New Collection", systemImage: "plus.circle.fill")
                     }
                 }
-                
-                
+
+                // Checks to see if no collections exist already
+                // if they do, it displays the second part of the list
                 if !collections.isEmpty {
                     Section("Flashcards") {
                         ForEach($collections) { $collection in
                             NavigationLink(collection.name) {
-                                Flashcard(collection: $collection, startStudying: startStudying)
+                                Flashcard(collection: $collection)
                             }
                         }
+                        // Slide over to left, delete option appears where
+                        // deleteCollections function is run
                         .onDelete(perform: deleteCollections)
                     }
                 }
             }
+            // Styling for list
             .listStyle(.insetGrouped)
             .navigationTitle("Study Cards")
             .onAppear {
                 loadCollections()
             }
-            
-            .navigationDestination(isPresented: Binding(
-                get: { studyCollection != nil && studyMode != nil },
-                set: { if !$0 { studyCollection = nil; studyMode = nil } }
-            )) {
-                if let collection = studyCollection, let mode = studyMode {
-                    Studying(cards: collection.cards, mode: mode)
-                }
-            }
         }
+        // Creating a new collection of cards
         .sheet(isPresented: $showCreateNewCollection) {
             NavigationStack {
                 Form {
@@ -81,13 +85,9 @@ struct ContentView: View {
             .presentationDetents([.medium])
         }
     }
-    
-    private func startStudying(collection: CardCollection, mode: StudyMode) {
-        studyCollection = collection
-        studyMode = mode
-    }
-    
-    
+
+    // Function calls the listCollections function from the Persistence object(?)/file
+    // to load card collections if available
     private func loadCollections() {
         do {
             collections = try Persistence.listCollections()
@@ -96,7 +96,8 @@ struct ContentView: View {
             print("Loading failed: ", error)
         }
     }
-    
+
+    // Uses the saveCollection function inside Persistence to save a new collection
     private func saveNewCollection() {
         let trimmed = newCollectionName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
@@ -114,7 +115,8 @@ struct ContentView: View {
         newCollectionName = ""
         showCreateNewCollection = false
     }
-    
+
+    // Deletes a collection
     private func deleteCollections(at offsets: IndexSet) {
         let idsToDelete = offsets.map { collections[$0].id }
         collections.remove(atOffsets: offsets)
@@ -122,4 +124,8 @@ struct ContentView: View {
             try? Persistence.deleteCollection(id: id)
         }
     }
+}
+
+#Preview {
+    ContentView()
 }

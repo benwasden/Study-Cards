@@ -13,24 +13,24 @@ struct Flashcard: View {
     @State private var definition: String = ""
     @FocusState private var focusedField: Field?
     @State private var studyCollection: CardCollection? = nil
-
+    @State private var isStudying: Bool = false
+    @State private var studyMode: StudyMode = .termFirst
+    
     enum Field {
         case term, definition
     }
-
-    var startStudying: (CardCollection, StudyMode) -> Void
-
+    
     var body: some View {
         List {
             Section("Add New Card") {
                 TextField("Term", text: $term)
                     .focused($focusedField, equals: .term)
                     .textInputAutocapitalization(.words)
-
+                
                 TextField("Definition", text: $definition, axis: .vertical)
                     .focused($focusedField, equals: .definition)
                     .textInputAutocapitalization(.sentences)
-
+                
                 Button {
                     addCard()
                 } label: {
@@ -39,22 +39,22 @@ struct Flashcard: View {
                 .disabled(term.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
                           definition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-
+            
             if !collection.cards.isEmpty {
-                    Section("Study By") {
-                        Button {
-                            startStudying(collection, .termFirst)
-                        } label: {
-                            Label("Term", systemImage: "book.closed.fill")
-                        }
-
-                        Button {
-                            startStudying(collection, .definitionFirst)
-                        } label: {
-                            Label("Description", systemImage: "text.pad.header")
-                        }
+                Section("Study By") {
+                    Button("Term") {
+                        studyMode = .termFirst
+                        isStudying = true
                     }
-
+                    
+                    Button("Description") {
+                        studyMode = .definitionFirst
+                        isStudying = true
+                    }.navigationTitle(collection.name)
+                        .navigationDestination(isPresented: $isStudying) {
+                            Studying(cards: collection.cards, mode: studyMode)
+                        }
+                }
                     Section("Cards") {
                         ForEach(collection.cards) { card in
                             VStack(alignment: .leading) {
@@ -64,35 +64,38 @@ struct Flashcard: View {
                         }
                         .onDelete(perform: deleteCards)
                     }
-                }
             }
-            .navigationTitle(collection.name)
-    }
-
-    private func addCard() {
-        let new = Card(term: term.trimmingCharacters(in: .whitespacesAndNewlines),
-                       definition: definition.trimmingCharacters(in: .whitespacesAndNewlines))
-        collection.cards.append(new)
-        term = ""
-        definition = ""
-        focusedField = .term
-        saveCollection()
-    }
-
-    private func deleteCards(at offsets: IndexSet) {
-        collection.cards.remove(atOffsets: offsets)
-        saveCollection()
-    }
-
-    private func saveCollection() {
-        do {
-            try Persistence.saveCollection(collection)
-        } catch {
-            print("Save failed:", error)
         }
     }
-}
-
-#Preview {
-    ContentView()
+        // Adds a card to the collection for studying. Validates the inputs so users can't
+        // enter blank space
+        private func addCard() {
+            let new = Card(term: term.trimmingCharacters(in: .whitespacesAndNewlines),
+                           definition: definition.trimmingCharacters(in: .whitespacesAndNewlines))
+            collection.cards.append(new)
+            term = ""
+            definition = ""
+            focusedField = .term
+            saveCollection()
+        }
+        
+        // Allows a user to delete a card from a collection
+        private func deleteCards(at offsets: IndexSet) {
+            collection.cards.remove(atOffsets: offsets)
+            saveCollection()
+        }
+        
+        // Saves any changes made from addCard or deleteCards
+        private func saveCollection() {
+            do {
+                try Persistence.saveCollection(collection)
+            } catch {
+                print("Save failed:", error)
+            }
+        
+    }
+    
+    #Preview {
+        ContentView()
+    }
 }

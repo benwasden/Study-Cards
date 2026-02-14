@@ -27,7 +27,7 @@ struct Studying: View {
 
     var body: some View {
         VStack(spacing: 20) {
-                // Card face
+                // Creating the card's face
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(.background)
@@ -46,7 +46,7 @@ struct Studying: View {
                 .frame(maxWidth: .infinity, maxHeight: 280)
                 .padding(.horizontal)
 
-                // Controls
+                // Controls for previous and next card and flipping card over
                 HStack(spacing: 16) {
                     Button {
                         previous()
@@ -87,13 +87,15 @@ struct Studying: View {
         .navigationTitle(mode == .termFirst ? "Study: Term First" : "Study: Definition First")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            
-            print("Studying appeared with mode ", mode)
+            // Debugging print statement
+//            print("Studying appeared with mode ", mode)
             showingFront = true
         }
         .padding(.top)
     }
 
+    // Gets the text for the front of the card when it's displayed. Checks to see
+    // if user asked to study by term of by definition before filling it out
     private func frontText(for card: Card) -> String {
         switch mode {
         case .termFirst:
@@ -103,18 +105,21 @@ struct Studying: View {
         }
     }
 
+    // Just an animation for the card flipping over so it looks nicer :-)
     private func flip() {
         withAnimation(.easeInOut) {
             showingFront.toggle()
         }
     }
 
+    // Advances forward one card
     private func next() {
         guard index < cards.count - 1 else { return }
         index += 1
         showingFront = true
     }
 
+    // Advances backwards one card
     private func previous() {
         guard index > 0 else { return }
         index -= 1

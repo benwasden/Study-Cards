@@ -7,6 +7,7 @@
 
 import Foundation
 
+// Declares some structures for objects used around the application
 struct Card: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
     var term: String
