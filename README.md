@@ -4,7 +4,6 @@ This is a simple flashcard app for iOS. A user can create a collection of flashc
 
 I wanted to learn Swift and how to use other IDEs aside from VSCode. This is my first time using XCode and writing in Swift and I have a lot to learn still. I wanted to help fill the gap in my knowledge that is mobile development as that's only going to continue to be more important.
 
-[Software Demo Video]: In submission
 
 # Development Environment
 
